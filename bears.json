@@ -1,0 +1,11 @@
+[
+{"name":"1", "west":"black+", "north":"kodiak-", "east":"polar-", "south":"grizzly-"},
+{"name":"2", "west":"black+", "north":"grizzly+", "east":"polar+", "south":"kodiak+"},
+{"name":"3", "west":"black+", "north":"polar-", "east":"polar+", "south":"kodiak-"},
+{"name":"4", "west":"black+", "north":"black-", "east":"kodiak+", "south":"grizzly-"},
+{"name":"5", "west":"polar-", "north":"kodiak-", "east":"black-", "south":"grizzly-"},
+{"name":"6", "west":"kodiak-", "north":"grizzly+", "east":"polar+", "south":"grizzly-"},
+{"name":"7", "west":"grizzly+", "north":"polar-", "east":"black-", "south":"kodiak-"},
+{"name":"8", "west":"black+", "north":"kodiak+", "east":"polar-", "south":"grizzly+"},
+{"name":"9", "west":"polar-", "north":"grizzly-", "east":"black-", "south":"kodiak-"}
+]
