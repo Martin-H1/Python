@@ -27,43 +27,22 @@ class Tile:
                 return True
         return False
 
-    def matchEast(self, candidates):
-        '''Returns the first tile from candidates that is a pair to the East'''
-        for item in candidates:
-            start = item.direction
-            while True:
-                if Tile.isPair(self.east, item.west):
-                    return item
-                item.rotate()
-                if item.direction == start:
-                    break;
-        return None
-
-    def matchSouth(self, candidates):
-        '''Returns the first tile from candidates that is a pair to the South'''
-        for item in candidates:
-            start = item.direction
-            while True:
-                if Tile.isPair(self.south, item.north):
-                    return item
-                item.rotate()
-                if item.direction == start:
-                    break;
-        return None
-
     @staticmethod
-    def matchNorthAndWest(north, west, candidates):
-        '''Returns the first tile from candidates that is a pair to the South'''
-        if north is not None and west is not None:
-            for item in candidates:
-                start = item.direction
-                while True:
-                    if (Tile.isPair(north.south, item.north) and
-                        Tile.isPair(west.east, item.west)):
-                        return item
-                    item.rotate()
-                    if item.direction == start:
-                        break;
+    # Generalized match method that assumes match on No neighbor.
+    # Handles edge cells or those who's neighbors haven't been placed.
+    def match(north, west, east, south, candidates):
+        '''Returns the first tile from candidates that matches neighbors'''
+        for item in candidates:
+            start = item.direction
+            while True:
+                if ((north is None or Tile.isPair(north.south, item.north)) and
+                    (west is None or Tile.isPair(west.east, item.west)) and 
+                    (east is None or Tile.isPair(east.west, item.east)) and
+                    (south is None or Tile.isPair(south.north, item.south))):
+                    return item
+                item.rotate()
+                if item.direction == start:
+                    break;
         return None
 
     def rotate(self):
@@ -97,8 +76,10 @@ class Board:
     def non_copy_constructor(self):
         # Start with an empty board
         self.board = [[None, None, None],[None, None, None],[None, None, None]]
-        self.row = 0
-        self.col = 0
+
+        # Start solution in center
+        self.row = 1
+        self.col = 1
 
     def copy_constructor(self, orig):
         self.board = orig.board.copy()
@@ -111,65 +92,91 @@ class Board:
             text = ""
             for item in row:
                 if item == None:
-                    text += "None, "
+                    text += "None,\t\t"
                 else:
-                    text += "name=" + item.name + " dir=" + str(item.direction) + ", "
+                    text += "name=" + item.name + " dir=" + str(item.direction) + ",\t"
             print(text)
 
-    def incCol(self):
+    def next(self):
+        '''Advances to next cell on board with wrap around'''
         self.col += 1
         if self.col > 2:
             self.col = 0
             self.row += 1
             if self.row > 2:
-                return False
-        return True
+                self.row = 0
+
+    # Safe getters that return None rather than exception
+    def getNorth(self):
+        retVal = None
+        if self.row > 0:
+            retVal = self.board[self.row - 1][self.col]
+        return retVal
+
+    def getSouth(self):
+        retVal = None
+        if self.row < 2:
+            retVal = self.board[self.row + 1][self.col]
+        return retVal
+
+    def getEast(self):
+        retVal = None
+        if self.col < 2:
+            retVal = self.board[self.row][self.col + 1]
+        return retVal
+
+    def getWest(self):
+        retVal = None
+        if self.col > 0:
+            retVal = self.board[self.row][self.col - 1]
+        return retVal
+
+    def solveAll(self):
+        '''Runs solve with each item being first'''
+        length = len(self.items)
+        while length != 0:
+            if self.solve():
+                return True
+            else:
+                print("failed")
+                self.print()
+            self.items = self.items[1:] + self.items[:1]
+            length -= 1
+        return False
 
     def solve(self):
         clone = Board(self)
         retVal = clone.solveOne()
-        print(str(retVal) + str(len(self.items)))
+        print(str(retVal) + ", " + str(len(self.items)))
+        # Are we done?
+        if retVal == True and len(clone.items) == 0:
+            return True
+
+        # Did we fail?
         if retVal == False and len(clone.items) != 0:
             print("Backtracing needed " + str(len(self.items)))
             return False
+
+        # Recursively continue solution.
+        retVal = clone.solve()
+        if retVal == False and len(clone.items) != 0:
+            print("backtrace " + str(len(self.items)))
+            return False
         else:
-            retVal = clone.solve()
-            if retVal == False and len(clone.items) != 0:
-                print("backtrace " + str(len(self.items)))
-                return False
-            else:
-                return True
+            return True
 
     def solveOne(self):
-        # first row is special case a there's nothing to the north
-        if self.row == 0:
-            if self.col == 0:
-                # fill in the corner cell which always matches.
-                self.board[0][0] = self.items[0]
-                self.items.pop(0)
-                return self.incCol()
-            else:
-                match = self.board[0][self.col-1].matchEast(self.items)
-                if match is not None:
-                    self.board[0][self.col] = match
-                    match.popByName(self.items)
-                    return self.incCol()
-        elif self.col == 0:
-            # First column is a special case as there's nothing west.
-            match = self.board[self.row-1][0].matchSouth(self.items)
-            if match is not None:
-                self.board[self.row][0] = match
-                match.popByName(self.items)
-                return self.incCol()
-        else:
-            # complete the rest of row
-            match = Tile.matchNorthAndWest(self.board[self.row-1][self.col],
-                                           self.board[self.row][self.col-1],
-                                           self.items)
-            if match is not None:
-                self.board[self.row][self.col] = match
-                match.popByName(self.items)
-                return self.incCol()
+        # Get a match for current cell from the items.
+        match = Tile.match(self.getNorth(),
+                           self.getWest(),
+                           self.getEast(),
+                           self.getSouth(),
+                           self.items)
+        if match is not None:
+            self.board[self.row][self.col] = match
+            match.popByName(self.items)
+            self.next()
+            return True
         return False
 
 # Load and parse the file
