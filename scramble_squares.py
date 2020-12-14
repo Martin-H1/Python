@@ -104,6 +104,7 @@ class Board:
         self.board = orig.board.copy()
         self.row = orig.row
         self.col = orig.col
+        self.items = orig.items.copy()
 
     def print(self):
         for row in self.board:
@@ -124,46 +125,50 @@ class Board:
                 return False
         return True
 
-    def solve(self, items):
+    def solve(self):
         clone = Board(self)
-        items2 = items.copy()
-        while clone.solveOne(items2):
-            print(len(items2))
-        if len(items2) != 0:
-            print("Backtracing needed")
+        retVal = clone.solveOne()
+        print(str(retVal) + str(len(self.items)))
+        if retVal == False and len(clone.items) != 0:
+            print("Backtracing needed " + str(len(self.items)))
             return False
         else:
-            return True
+            retVal = clone.solve()
+            if retVal == False and len(clone.items) != 0:
+                print("backtrace " + str(len(self.items)))
+                return False
+            else:
+                return True
 
-    def solveOne(self, items):
+    def solveOne(self):
         # first row is special case a there's nothing to the north
         if self.row == 0:
             if self.col == 0:
                 # fill in the corner cell which always matches.
-                self.board[0][0] = items[0]
-                items.pop(0)
+                self.board[0][0] = self.items[0]
+                self.items.pop(0)
                 return self.incCol()
             else:
-                match = self.board[0][self.col-1].matchEast(items)
+                match = self.board[0][self.col-1].matchEast(self.items)
                 if match is not None:
                     self.board[0][self.col] = match
-                    match.popByName(items)
+                    match.popByName(self.items)
                     return self.incCol()
         elif self.col == 0:
             # First column is a special case as there's nothing west.
-            match = self.board[self.row-1][0].matchSouth(items)
+            match = self.board[self.row-1][0].matchSouth(self.items)
             if match is not None:
                 self.board[self.row][0] = match
-                match.popByName(items)
+                match.popByName(self.items)
                 return self.incCol()
         else:
             # complete the rest of row
             match = Tile.matchNorthAndWest(self.board[self.row-1][self.col],
                                            self.board[self.row][self.col-1],
-                                           items)
+                                           self.items)
             if match is not None:
                 self.board[self.row][self.col] = match
-                match.popByName(items)
+                match.popByName(self.items)
                 return self.incCol()
         return False
 
@@ -178,5 +183,6 @@ for item in data:
     tiles.append( Tile(item) )
 
 board = Board()
-board.solve(tiles)
+board.items = tiles
+board.solve()
 board.print()
