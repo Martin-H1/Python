@@ -9,13 +9,33 @@ import json
 import sys
 
 class Tile:
-    def __init__(self, json):
+    def __init__(self, param=None):
+        if isinstance(param, Tile):
+            self.copy_constructor(param)
+        else:
+            self.non_copy_constructor(param)
+
+    def non_copy_constructor(self, json):
         self.name = json["name"]
         self.west = json["west"]
         self.north = json["north"]
         self.east = json["east"]
         self.south = json["south"]
         self.direction = 0
+
+    def copy_constructor(self, orig):
+        self.name = orig.name
+        self.west = orig.west
+        self.north = orig.north
+        self.east = orig.east
+        self.south = orig.south
+        self.direction = orig.direction
+
+    def __str__(self):
+        retVal = ("Name=" + self.name + ", west=" + self.west +
+                  ", North=" + self.north + ", east=" + self.east +
+                  ", south=" + self.south + ", direction="+str(self.direction))
+        return retVal
 
     @staticmethod
     def isPair(tile, candidate):
@@ -28,10 +48,12 @@ class Tile:
         return False
 
     @staticmethod
-    # Generalized match method that assumes match on No neighbor.
-    # Handles edge cells or those who's neighbors haven't been placed.
+    # Generalized match method that handles edge cells or those who's neighbors
+    # haven't been placed. It returns the set of all possible matches including
+    # rotations of the same tile.
     def match(north, west, east, south, candidates):
-        '''Returns the first tile from candidates that matches neighbors'''
+        '''Returns the set of tile from candidates that matches neighbors'''
+        matches = []
         for item in candidates:
             start = item.direction
             while True:
@@ -39,11 +61,11 @@ class Tile:
                     (west is None or Tile.isPair(west.east, item.west)) and 
                     (east is None or Tile.isPair(east.west, item.east)) and
                     (south is None or Tile.isPair(south.north, item.south))):
-                    return item
+                    matches.append(Tile(item))
                 item.rotate()
                 if item.direction == start:
                     break;
-        return None
+        return matches
 
     def rotate(self):
         '''Rotates the tile counter clockwise '''
@@ -63,23 +85,12 @@ class Tile:
                 rest.pop(idx)
         return rest
 
-    def print(self):
-        print("Name=" + self.name + ", west=" + self.west + ", North=" + self.north + ", east=" + self.east + ", south=" + self.south + ", direction="+str(self.direction))
-
 class Board:
-    def __init__(self, orig=None):
-        if orig is None:
+    def __init__(self, param=None):
+        if isinstance(param, Board):
+            self.copy_constructor(param)
+        elif param is None:
             self.non_copy_constructor()
-        else:
-            self.copy_constructor(orig)
-
-    def non_copy_constructor(self):
-        # Start with an empty board
-        self.board = [[None, None, None],[None, None, None],[None, None, None]]
-
-        # Start solution in center
-        self.row = 1
-        self.col = 1
 
     def copy_constructor(self, orig):
         self.board = orig.board.copy()
@@ -87,15 +98,11 @@ class Board:
         self.col = orig.col
         self.items = orig.items.copy()
 
-    def print(self):
-        for row in self.board:
-            text = ""
-            for item in row:
-                if item == None:
-                    text += "None,\t\t"
-                else:
-                    text += "name=" + item.name + " dir=" + str(item.direction) + ",\t"
-            print(text)
+    def non_copy_constructor(self):
+        # Start with an empty board
+        self.board = [[None, None, None],[None, None, None],[None, None, None]]
+        self.row = 0
+        self.col = 0
 
     def next(self):
         '''Advances to next cell on board with wrap around'''
@@ -131,53 +138,52 @@ class Board:
             retVal = self.board[self.row][self.col - 1]
         return retVal
 
-    def solveAll(self):
-        '''Runs solve with each item being first'''
-        length = len(self.items)
-        while length != 0:
-            if self.solve():
+    def solve(self, depth=0):
+        # Check for recursion bottoming out.
+        if len(self.items) == 0:
+            print("*** Puzzle Solved! ***")
+            return True
+
+        # Get the list of match for current cell and board state.
+        matches = Tile.match(self.getNorth(),
+                             self.getWest(),
+                             self.getEast(),
+                             self.getSouth(),
+                             self.items)
+
+        # What are we trying to solve now?
+        print("  " * depth + "cell = (" + str(self.row) + "," + str(self.col) +
+              "), items = " + str(len(self.items)) +
+              ", matches = " + str(len(matches)))
+
+        # Try each possible solution.
+        for match in matches:
+            print("  " * depth + "tile = " + str(match))
+
+            # clone the current state to allow back tracking
+            clone = Board(self)
+            clone.board[self.row][self.col] = match
+            match.popByName(clone.items)
+            clone.next()
+            retVal = clone.solve(depth+1)
+ 
+           # Are we done?
+            if retVal == True:
+                self.board = clone.board
                 return True
-            else:
-                print("failed")
-                self.print()
-            self.items = self.items[1:] + self.items[:1]
-            length -= 1
+
+        # if we got here no path we tried worked.
         return False
 
-    def solve(self):
-        clone = Board(self)
-        retVal = clone.solveOne()
-        print(str(retVal) + ", " + str(len(self.items)))
-        # Are we done?
-        if retVal == True and len(clone.items) == 0:
-            return True
-
-        # Did we fail?
-        if retVal == False and len(clone.items) != 0:
-            print("Backtracing needed " + str(len(self.items)))
-            return False
-
-        # Recursively continue solution.
-        retVal = clone.solve()
-        if retVal == False and len(clone.items) != 0:
-            print("backtrace " + str(len(self.items)))
-            return False
-        else:
-            return True
-
-    def solveOne(self):
-        # Get a match for current cell from the items.
-        match = Tile.match(self.getNorth(),
-                           self.getWest(),
-                           self.getEast(),
-                           self.getSouth(),
-                           self.items)
-        if match is not None:
-            self.board[self.row][self.col] = match
-            match.popByName(self.items)
-            self.next()
-            return True
-        return False
+    def print(self):
+        for row in self.board:
+            text = ""
+            for item in row:
+                if item == None:
+                    text += "None,\t\t"
+                else:
+                    text += "name=" + item.name + " dir=" + str(item.direction) + ",\t"
+            print(text)
 
 # Load and parse the file
 
