@@ -15,5 +15,8 @@ else
     TOUCH = touch
 endif
 
-scramble:
+bears:
 	$(PYTHON) scramble_squares.py bears.json
+
+wolves:
+	$(PYTHON) scramble_squares.py wolves.json

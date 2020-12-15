@@ -92,11 +92,23 @@ class Board:
         elif param is None:
             self.non_copy_constructor()
 
+    def __str__(self):
+        retVal = ("board=" + str(self.board) +
+                  ", row=" + str(self.row) +
+                  ", col=" + str(self.col) +
+                  ", items"+ str(self.items))
+        return retVal
+
+
     def copy_constructor(self, orig):
-        self.board = orig.board.copy()
         self.row = orig.row
         self.col = orig.col
         self.items = orig.items.copy()
+
+        self.board = []
+        self.board.append(orig.board[0].copy())
+        self.board.append(orig.board[1].copy())
+        self.board.append(orig.board[2].copy())
 
     def non_copy_constructor(self):
         # Start with an empty board
@@ -162,12 +174,12 @@ class Board:
 
             # clone the current state to allow back tracking
             clone = Board(self)
-            clone.board[self.row][self.col] = match
+            clone.board[clone.row][clone.col] = match
             match.popByName(clone.items)
             clone.next()
             retVal = clone.solve(depth+1)
  
-           # Are we done?
+            # Are we done?
             if retVal == True:
                 self.board = clone.board
                 return True

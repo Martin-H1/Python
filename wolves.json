@@ -1,0 +1,11 @@
+[
+{"name":"2", "west":"grey-", "north":"arctic-", "east":"arctic+", "south":"black-"},
+{"name":"1", "west":"coyote-", "north":"grey-", "east":"grey+", "south":"black+"},
+{"name":"3", "west":"arctic-", "north":"coyote-", "east":"black-", "south":"grey+"},
+{"name":"4", "west":"grey-", "north":"black-", "east":"arctic-", "south":"grey-"},
+{"name":"5", "west":"arctic+", "north":"black+", "east":"grey-", "south":"coyote+"},
+{"name":"6", "west":"grey+", "north":"coyote-", "east":"arctic-", "south":"black-"},
+{"name":"7", "west":"black-", "north":"coyote+", "east":"arctic+", "south":"grey+"},
+{"name":"8", "west":"arctic-", "north":"coyote-", "east":"grey+", "south":"black+"},
+{"name":"9", "west":"black+", "north":"arctic-", "east":"coyote+", "south":"grey-"}
+]
