@@ -1,7 +1,7 @@
 # Macros to enable Linux versus Windows portability.
 ifeq ($(OS),Windows_NT)
     / = $(strip \)
-    PYTHON = C:\Users\Martin\AppData\Local\Programs\Python\Python38\python.exe
+    PYTHON = C:\Users\mheer\AppData\Local\Programs\Python\Python311\python.exe
     RM = del /f /q
     RMDIR = rmdir /s /q
     SHELL_EXT = bat
