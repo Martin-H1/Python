@@ -1,0 +1,22 @@
+# Macros to enable Linux versus Windows portability.
+ifeq ($(OS),Windows_NT)
+    / = $(strip \)
+    PYTHON = C:\Users\mheer\AppData\Local\Programs\Python\Python311\python.exe
+    RM = del /f /q
+    RMDIR = rmdir /s /q
+    SHELL_EXT = bat
+    TOUCH = type nul >
+else
+    / = /
+    PYTHON = python
+    RM = rm -f
+    RMDIR = rm -rf
+    SHELL_EXT = sh
+    TOUCH = touch
+endif
+
+words:
+	$(PYTHON) etl.py
+
+wordlebot:
+	$(PYTHON) wordlebot.py
