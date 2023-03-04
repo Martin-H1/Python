@@ -2,6 +2,7 @@ abaci
 abhor
 abide
 abode
+above
 acari
 acini
 adieu
@@ -859,6 +860,7 @@ total
 towel
 tragi
 tread
+trend
 tried
 truer
 tryma

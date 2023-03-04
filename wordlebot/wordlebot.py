@@ -71,7 +71,6 @@ def filter_word(word, context):
     return retval
 
 def filter_words(guess, words, context):
-    print("Guess = " + guess + ", input number of words = " + str(len(words)))
     # First score the guess to enabling filtering
     score = score_guess(guess, context)
     print(score)
@@ -101,15 +100,29 @@ def filter_words(guess, words, context):
 # Create a global with all words.
 words = load_words("words.txt")
 
-secret = "frost"
+secret = input("Enter secret: ")
 
 ctx = Context()
-ctx.excludes = ""
 
+guesses = 1
 guess = "salet"
-filter_words(guess, words, ctx)
-print(ctx)
-filter_words(ctx.candidate_words[0], ctx.candidate_words, ctx)
-print(ctx)
-filter_words(ctx.candidate_words[0], ctx.candidate_words, ctx)
-print(ctx)
+while (guesses < 7):
+    # Have we found the solution?
+    if len(words) == 1:
+        print("Wordle solved in " + str(guesses) +
+              ", word = " + guess)
+        break
+
+    # Display some progress
+    print(str(guesses) + ", Guess = " + guess +
+          ", input number of words = " + str(len(words)))
+    filter_words(guess, words, ctx)
+    print(ctx)
+
+    # Set up for next iteration.
+    words = ctx.candidate_words
+    if len(words) == 0:
+        print("No Wordle solution found.")
+        break
+    guess = ctx.candidate_words[0]
+    guesses += 1
