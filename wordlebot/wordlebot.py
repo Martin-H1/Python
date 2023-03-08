@@ -77,17 +77,18 @@ def filter_words(guess, words, context):
 
     # Add each letter's score to appropriate filter criteria.
     for idx in range(5):
+        gchar = guess[idx]
         # Add any misses to excluded letters.
-        if score[idx] == Match.Miss:
-            context.excludes += guess[idx]
+        if score[idx] == Match.Miss and context.excludes.find(gchar) == -1:
+            context.excludes += gchar
 
         # Add any partials to the contains list.
-        if score[idx] == Match.Partial:
-            context.contains += guess[idx]
+        if score[idx] == Match.Partial and context.contains.find(gchar) == -1:
+            context.contains += gchar
 
         # Add any exact to the target word.
         if score[idx] == Match.Exact:
-            context.word[idx] = guess[idx]
+            context.word[idx] = gchar
 
     # Now use the context to filter the word list.
     retval = []
