@@ -93,7 +93,7 @@ def filter_words(guess, words, context):
     # Now use the context to filter the word list.
     retval = []
     for word in words:
-        if filter_word(word, context):
+        if word != guess and filter_word(word, context):
             retval.append(word)
     context.candidate_words = retval
     return retval
