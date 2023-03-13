@@ -108,17 +108,17 @@ ctx = Context()
 guesses = 1
 guess = "salet"
 while (guesses < 7):
-    # Have we found the solution?
-    if len(words) == 1:
-        print("Wordle solved in " + str(guesses) +
-              ", word = " + guess)
-        break
-
-    # Display some progress
+    # Display progress
     print(str(guesses) + ", Guess = " + guess +
           ", input number of words = " + str(len(words)))
     filter_words(guess, words, ctx)
     print(ctx)
+
+    # Have we found the solution?
+    if len(list(filter (lambda x : x == '*', ctx.word))) == 0:
+        print("Wordle solved in " + str(guesses) +
+              ", word = " + guess)
+        break
 
     # Set up for next iteration.
     words = ctx.candidate_words
