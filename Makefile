@@ -20,3 +20,9 @@ bears:
 
 wolves:
 	$(PYTHON) scramble_squares.py wolves.json
+
+tree:
+	$(PYTHON) family_tree.py family.json
+
+brads:
+	$(PYTHON) binary_radians.py

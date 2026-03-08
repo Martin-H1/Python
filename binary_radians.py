@@ -27,9 +27,9 @@ acute_angle = int(num_of_brads / 8)
 right_angle = int(num_of_brads / 4)
 straight_angle = int(num_of_brads / 2)
 reflex_angle = int(num_of_brads - right_angle)
-max_brad = num_of_brads - 1
 
 print("hex")
+print(f"{n:04x} constant BRAD_N")
 print(f"{degree_angle:04x} constant DEGREE_ANGLE")
 print(f"{acute_angle:04x} constant ACUTE_ANGLE")
 print(f"{right_angle:04x} constant RIGHT_ANGLE")
